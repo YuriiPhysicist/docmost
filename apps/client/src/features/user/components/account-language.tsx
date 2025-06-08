@@ -41,6 +41,7 @@ function LanguageSwitcher() {
     <Select
       label={t("Select language")}
       data={[
+        { value: "uk-UA", label: "Українська (Ukrainian)" },
         { value: "en-US", label: "English (US)" },
         { value: "de-DE", label: "Deutsch (German)" },
         { value: "nl-NL", label: "Dutch (Netherlands)" },
