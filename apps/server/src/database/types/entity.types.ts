@@ -17,6 +17,7 @@ import {
   AuthProviders,
   AuthAccounts,
   Shares,
+  PageMembers,
 } from './db';
 
 // Workspace
@@ -107,3 +108,7 @@ export type UpdatableAuthAccount = Updateable<Omit<AuthAccounts, 'id'>>;
 export type Share = Selectable<Shares>;
 export type InsertableShare = Insertable<Shares>;
 export type UpdatableShare = Updateable<Omit<Shares, 'id'>>;
+
+export type PageMember = Selectable<PageMembers>;
+export type InsertablePageMember = Insertable<PageMembers>;
+export type UpdatablePageMember = Updateable<Omit<PageMembers, 'id'>>;

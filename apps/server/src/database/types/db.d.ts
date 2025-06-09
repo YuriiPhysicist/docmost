@@ -291,6 +291,18 @@ export interface Workspaces {
   updatedAt: Generated<Timestamp>;
 }
 
+export interface PageMembers {
+  cascadeToChildren: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  groupId: string | null;
+  id: Generated<string>;
+  inheritedFromSpaceRole: string | null;
+  pageId: string;
+  role: string;
+  updatedAt: Generated<Timestamp>;
+  userId: string | null;
+}
+
 export interface DB {
   attachments: Attachments;
   authAccounts: AuthAccounts;
@@ -309,4 +321,5 @@ export interface DB {
   userTokens: UserTokens;
   workspaceInvitations: WorkspaceInvitations;
   workspaces: Workspaces;
+  pageMembers: PageMembers;
 }

@@ -8,6 +8,7 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  Param
 } from '@nestjs/common';
 import { PageService } from './services/page.service';
 import { CreatePageDto } from './dto/create-page.dto';
@@ -29,6 +30,9 @@ import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
 import { PageRepo } from '@docmost/db/repos/page/page.repo';
 import { RecentPageDto } from './dto/recent-page.dto';
 import { CopyPageToSpaceDto } from './dto/copy-page.dto';
+import { PageMemberService } from './services/page-member.service';
+import { SetPagePermissionDto } from './dto/page-member.dto';
+import {PageRole} from "../../common/helpers/types/permission";
 
 @UseGuards(JwtAuthGuard)
 @Controller('pages')
@@ -38,6 +42,7 @@ export class PageController {
     private readonly pageRepo: PageRepo,
     private readonly pageHistoryService: PageHistoryService,
     private readonly spaceAbility: SpaceAbilityFactory,
+    private readonly pageMemberService: PageMemberService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -60,6 +65,11 @@ export class PageController {
       throw new ForbiddenException();
     }
 
+    const effectiveRole = await this.pageMemberService.getUserEffectiveRole(user.id, page.id);
+    if (effectiveRole === PageRole.BLOCKED) {
+      throw new ForbiddenException('Access to this page is blocked');
+    }
+
     return page;
   }
 
@@ -78,6 +88,16 @@ export class PageController {
       throw new ForbiddenException();
     }
 
+    if (createPageDto.parentPageId) {
+      const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+        user.id,
+        createPageDto.parentPageId
+      );
+      if (effectiveRole === PageRole.BLOCKED || effectiveRole === PageRole.READER) {
+        throw new ForbiddenException('Cannot create child page: insufficient permissions on parent page');
+      }
+    }
+
     return this.pageService.create(user.id, workspace.id, createPageDto);
   }
 
@@ -94,6 +114,12 @@ export class PageController {
     if (ability.cannot(SpaceCaslAction.Edit, SpaceCaslSubject.Page)) {
       throw new ForbiddenException();
     }
+
+    const effectiveRole = await this.pageMemberService.getUserEffectiveRole(user.id, page.id);
+    if (effectiveRole === PageRole.BLOCKED || effectiveRole === PageRole.READER) {
+      throw new ForbiddenException('Insufficient permissions to edit this page');
+    }
+
 
     return this.pageService.update(page, updatePageDto, user.id);
   }
@@ -205,7 +231,26 @@ export class PageController {
       pageId = page.id;
     }
 
-    return this.pageService.getSidebarPages(dto.spaceId, pagination, pageId);
+    const result = await this.pageService.getSidebarPages(dto.spaceId, pagination, pageId);
+
+    const enrichedItems = await Promise.all(
+      result.items.map(async (page) => {
+        const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+          user.id,
+          page.id
+        );
+
+        return {
+          ...page,
+          effectiveRole,
+        };
+      })
+    );
+
+    return {
+      ...result,
+      items: enrichedItems
+    };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -300,5 +345,81 @@ export class PageController {
       throw new ForbiddenException();
     }
     return this.pageService.getPageBreadCrumbs(page.id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/permissions')
+  async getPagePermissions(
+    @Param('id') pageId: string,
+    @Body() pagination: PaginationOptions,
+    @AuthUser() user: User,
+  ) {
+    const page = await this.pageRepo.findById(pageId);
+    if (!page) {
+      throw new NotFoundException('Page not found');
+    }
+
+    const ability = await this.spaceAbility.createForUser(user, page.spaceId);
+    if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.PagePermissions)) {
+      throw new ForbiddenException();
+    }
+
+    return this.pageMemberService.getPageMembersWithEffectiveRoles(
+      pageId,
+      pagination
+    );
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/permissions/set')
+  async setPagePermission(
+    @Param('id') pageId: string,
+    @Body() dto: SetPagePermissionDto,
+    @AuthUser() user: User,
+    @AuthWorkspace() workspace: Workspace,
+  ) {
+    dto.pageId = pageId;
+
+    const page = await this.pageRepo.findById(pageId);
+    if (!page) {
+      throw new NotFoundException('Page not found');
+    }
+
+    const ability = await this.spaceAbility.createForUser(user, page.spaceId);
+    if (ability.cannot(SpaceCaslAction.ManagePagePermissions, SpaceCaslSubject.PagePermissions)) {
+      throw new ForbiddenException();
+    }
+
+    await this.pageMemberService.setPagePermission(dto, user.id, workspace.id);
+
+    return { success: true };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/effective-role')
+  async getEffectiveRole(
+    @Param('id') pageId: string,
+    @AuthUser() user: User,
+  ) {
+    const page = await this.pageRepo.findById(pageId);
+    if (!page) {
+      throw new NotFoundException('Page not found');
+    }
+
+    const ability = await this.spaceAbility.createForUser(user, page.spaceId);
+    if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+      user.id,
+      pageId
+    );
+
+    return {
+      pageId,
+      userId: user.id,
+      effectiveRole,
+    };
   }
 }

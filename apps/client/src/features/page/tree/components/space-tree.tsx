@@ -22,7 +22,7 @@ import {
   IconLink,
   IconPlus,
   IconPointFilled,
-  IconTrash,
+  IconTrash, IconUsersGroup,
 } from "@tabler/icons-react";
 import { appendNodeChildrenAtom, treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom.ts";
 import clsx from "clsx";
@@ -62,6 +62,7 @@ import MovePageModal from "../../components/move-page-modal.tsx";
 import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import CopyPageModal from "../../components/copy-page-modal.tsx";
+import PermissionsModal from "../../components/permissions-modal.tsx";
 
 interface SpaceTreeProps {
   spaceId: string;
@@ -447,6 +448,8 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
     copyPageModalOpened,
     { open: openCopyPageModal, close: closeCopySpaceModal },
   ] = useDisclosure(false);
+  const [permissionsModalOpened, { open: openPermissionsModal, close: closePermissionsModal }] =
+    useDisclosure(false);
 
   const handleCopyLink = () => {
     const pageUrl =
@@ -520,6 +523,19 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
               >
                 {t("Copy")}
               </Menu.Item>
+              {
+
+                <Menu.Item
+                  leftSection={<IconUsersGroup size={16} />}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openPermissionsModal();
+                  }}
+                >
+                  {t("Page roles")}
+                </Menu.Item>
+              }
 
               <Menu.Divider />
               <Menu.Item
@@ -558,6 +574,13 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
         id={node.id}
         open={exportOpened}
         onClose={closeExportModal}
+      />
+
+      <PermissionsModal
+        node={node}
+        // currentSpaceSlug={spaceSlug}
+        onClose={closePermissionsModal}
+        open={permissionsModalOpened}
       />
     </>
   );

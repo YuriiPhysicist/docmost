@@ -14,3 +14,20 @@ export enum SpaceVisibility {
   OPEN = 'open', // any workspace member can see that it exists and join.
   PRIVATE = 'private', // only added space users can see
 }
+
+export enum PageRole {
+  ADMIN = 'admin',
+  WRITER = 'writer',
+  READER = 'reader',
+  BLOCKED = 'blocked',
+}
+
+export type EffectivePageRole = PageRole | SpaceRole | null;
+
+export interface PagePermissionOverride {
+  userId?: string;
+  groupId?: string;
+  role: PageRole;
+  inheritedFromSpaceRole?: SpaceRole;
+  cascadeToChildren?: boolean;
+}
