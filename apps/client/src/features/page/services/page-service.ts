@@ -140,13 +140,3 @@ export async function uploadFile(
 
   return req as unknown as IAttachment;
 }
-
-export const getPageMembers = (pageId: string) =>
-  api.post<IPageMember[]>(`/pages/${pageId}/permissions`).then(res => res.data);
-
-
-export const updatePageMemberRole = (data: {
-  pageId: string;
-  userId: string;
-  role: string;
-}) => api.post(`/pages/${data.pageId}/permissions/set`, data);

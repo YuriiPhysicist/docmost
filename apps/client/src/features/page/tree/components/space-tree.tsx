@@ -62,7 +62,7 @@ import MovePageModal from "../../components/move-page-modal.tsx";
 import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import CopyPageModal from "../../components/copy-page-modal.tsx";
-import PermissionsModal from "../../components/permissions-modal.tsx";
+import PagePermissionsModal from "@/features/page/components/page-permissions-modal.tsx";
 
 interface SpaceTreeProps {
   spaceId: string;
@@ -576,9 +576,8 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
         onClose={closeExportModal}
       />
 
-      <PermissionsModal
+      <PagePermissionsModal
         node={node}
-        // currentSpaceSlug={spaceSlug}
         onClose={closePermissionsModal}
         open={permissionsModalOpened}
       />

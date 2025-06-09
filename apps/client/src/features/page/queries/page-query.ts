@@ -17,7 +17,7 @@ import {
   movePage,
   getPageBreadcrumbs,
   getRecentChanges,
-  getAllSidebarPages, getPageMembers, updatePageMemberRole,
+  getAllSidebarPages,
 } from "@/features/page/services/page-service";
 import {
   IMovePage,
@@ -185,32 +185,6 @@ export function useRecentChangesQuery(
     queryKey: ["recent-changes", spaceId],
     queryFn: () => getRecentChanges(spaceId),
     refetchOnMount: true,
-  });
-}
-
-export function usePageMembersQuery(pageId: string) {
-  return useQuery<IPageMember[]>({
-    queryKey: ["pageMembers", pageId],
-    queryFn: () => getPageMembers(pageId),
-    enabled: !!pageId,
-  });
-}
-
-export function useUpdatePageMemberRoleMutation() {
-  return useMutation({
-    mutationFn: (data: { pageId: string; userId: string; role: string }) =>
-      updatePageMemberRole(data),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["pageMembers", variables.pageId],
-      });
-
-      notifications.show({ message: "User role successfully updated" });
-    },
-    onError: (error) => {
-      const errorMessage = error["response"]?.data?.message;
-      notifications.show({ message: errorMessage, color: "red" });
-    },
   });
 }
 
