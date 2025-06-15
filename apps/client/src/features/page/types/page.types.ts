@@ -1,6 +1,6 @@
 import { ISpace } from "@/features/space/types/space.types.ts";
 
-export type AccessLevel = "read" | "write" | "admin" | 'block';
+export type AccessLevel = 'admin' | 'writer' | 'reader' | 'block';
 
 export interface IPage {
   id: string;
@@ -22,6 +22,7 @@ export interface IPage {
   hasChildren: boolean;
   creator: ICreator;
   lastUpdatedBy: ILastUpdatedBy;
+  effectiveRole: AccessLevel;
   space: Partial<ISpace>;
 }
 

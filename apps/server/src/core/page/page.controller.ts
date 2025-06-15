@@ -247,9 +247,13 @@ export class PageController {
       })
     );
 
+    const accessibleItems = enrichedItems.filter(page =>
+      page.effectiveRole !== 'blocked'
+    );
+
     return {
       ...result,
-      items: enrichedItems
+      items: accessibleItems
     };
   }
 

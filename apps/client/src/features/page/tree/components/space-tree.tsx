@@ -63,6 +63,7 @@ import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sideb
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import CopyPageModal from "../../components/copy-page-modal.tsx";
 import PagePermissionsModal from "@/features/page/components/page-permissions-modal.tsx";
+import {ca} from "date-fns/locale";
 
 interface SpaceTreeProps {
   spaceId: string;
@@ -103,6 +104,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   useEffect(() => {
     if (pagesData?.pages && !hasNextPage) {
       const allItems = pagesData.pages.flatMap((page) => page.items);
+
       const treeData = buildTree(allItems);
 
       if (data.length < 1 || data?.[0].spaceId !== spaceId) {
@@ -245,6 +247,13 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
 
+  const effectiveRole = node.data.effectiveRole;
+  if (!effectiveRole) {
+    console.warn('Node does not have an effective role set:', node.data);
+  }
+  const isAdmin = effectiveRole === 'admin';
+  const canEdit = !tree.props.disableEdit && ['admin', 'writer'].includes(effectiveRole);
+
   const prefetchPage = () => {
     timerRef.current = setTimeout(() => {
       queryClient.prefetchQuery({
@@ -370,7 +379,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
                 <IconFileDescription size="18" />
               )
             }
-            readOnly={tree.props.disableEdit as boolean}
+            readOnly={!canEdit}
             removeEmojiAction={handleRemoveEmoji}
           />
         </div>
@@ -378,9 +387,9 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         <span className={classes.text}>{node.data.name || t("untitled")}</span>
 
         <div className={classes.actions}>
-          <NodeMenu node={node} treeApi={tree} />
+          <NodeMenu node={node} treeApi={tree} canEdit={canEdit} isAdmin={isAdmin} />
 
-          {!tree.props.disableEdit && (
+          {canEdit && (
             <CreateNode
               node={node}
               treeApi={tree}
@@ -431,9 +440,11 @@ function CreateNode({ node, treeApi, onExpandTree }: CreateNodeProps) {
 interface NodeMenuProps {
   node: NodeApi<SpaceTreeNode>;
   treeApi: TreeApi<SpaceTreeNode>;
+  canEdit: boolean;
+  isAdmin: boolean;
 }
 
-function NodeMenu({ node, treeApi }: NodeMenuProps) {
+function NodeMenu({ node, treeApi, canEdit, isAdmin }: NodeMenuProps) {
   const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
   const { spaceSlug } = useParams();
@@ -500,7 +511,7 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
             {t("Export page")}
           </Menu.Item>
 
-          {!(treeApi.props.disableEdit as boolean) && (
+          {canEdit && (
             <>
               <Menu.Item
                 leftSection={<IconArrowRight size={16} />}
@@ -524,7 +535,7 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
                 {t("Copy")}
               </Menu.Item>
               {
-
+                isAdmin &&
                 <Menu.Item
                   leftSection={<IconUsersGroup size={16} />}
                   onClick={(e) => {

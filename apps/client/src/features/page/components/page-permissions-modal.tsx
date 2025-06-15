@@ -165,7 +165,7 @@ function MemberRow({
               <IconGroupCircle />
             ) : (
               <CustomAvatar
-                avatarUrl={member.userEmail || ""}
+                avatarUrl={member.userAvatarUrl || ""}
                 name={member.userName || ""}
               />
             )}

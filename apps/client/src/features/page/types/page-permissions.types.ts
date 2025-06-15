@@ -6,6 +6,7 @@ export interface IPagePermissionMember {
   groupName?: string;
   groupMembers?: Array<{id: string, name: string, email: string}>;
   spaceRole: string;
+  userAvatarUrl?: string;
   pageRole: string | null;
 }
 
