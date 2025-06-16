@@ -20,6 +20,7 @@ import {
   getAllSidebarPages,
 } from "@/features/page/services/page-service";
 import {
+  AccessLevel,
   IMovePage,
   IPage,
   IPageInput, IPageMember,
@@ -192,6 +193,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
   const newPage: Partial<IPage> = {
     creatorId: data.creatorId,
     hasChildren: data.hasChildren,
+    hasVisibleChildren: data.hasVisibleChildren,
     icon: data.icon,
     id: data.id,
     parentPageId: data.parentPageId,
@@ -199,6 +201,7 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     slugId: data.slugId,
     spaceId: data.spaceId,
     title: data.title,
+    effectiveRole: data.effectiveRole
   };
 
   let queryKey: QueryKey = null;
