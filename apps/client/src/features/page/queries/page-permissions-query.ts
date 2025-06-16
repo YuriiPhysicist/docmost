@@ -26,12 +26,12 @@ export function useSetPagePermissionsMutation() {
       userId?: string;
       groupId?: string;
       role: string;
+      cascadeToChildren?: boolean;
     }) => setPagePermissions(data),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["pagePermissions", variables.pageId],
+        queryKey: ["pagePermissions"],
       });
-
       notifications.show({
         message: t("Page permissions updated successfully")
       });

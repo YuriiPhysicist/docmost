@@ -1,3 +1,5 @@
+import {AccessLevel} from "@/features/page/types/page.types.ts";
+
 export interface IPagePermissionMember {
   userId?: string;
   userName?: string;
@@ -8,6 +10,7 @@ export interface IPagePermissionMember {
   spaceRole: string;
   userAvatarUrl?: string;
   pageRole: string | null;
+  parentPageRole: AccessLevel
 }
 
 export interface IPagePermissionsResponse {

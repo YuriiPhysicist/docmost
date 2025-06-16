@@ -34,6 +34,8 @@ import { jsonToNode, jsonToText } from 'src/collaboration/collaboration.util';
 import { CopyPageMapEntry, ICopyPageAttachment } from '../dto/copy-page.dto';
 import { Node as PMNode } from '@tiptap/pm/model';
 import { StorageService } from '../../../integrations/storage/storage.service';
+import {PageMemberService} from "./page-member.service";
+import {PageRole} from "../../../common/helpers/types/permission";
 
 @Injectable()
 export class PageService {
@@ -44,6 +46,7 @@ export class PageService {
     private attachmentRepo: AttachmentRepo,
     @InjectKysely() private readonly db: KyselyDB,
     private readonly storageService: StorageService,
+    private readonly pageMemberService: PageMemberService
   ) {}
 
   async findById(
@@ -94,7 +97,42 @@ export class PageService {
       lastUpdatedById: userId,
     });
 
+    if (parentPageId) {
+      await this.inheritParentPagePermissions(parentPageId, createdPage.id);
+    }
+
     return createdPage;
+  }
+
+  private async inheritParentPagePermissions(
+    parentPageId: string,
+    childPageId: string,
+  ): Promise<void> {
+    const parentPermissions = await this.db
+      .selectFrom('pageMembers')
+      .selectAll()
+      .where('pageId', '=', parentPageId)
+      .execute();
+
+    if (parentPermissions.length === 0) {
+      return;
+    }
+
+    const childPermissions = parentPermissions.map(permission => ({
+      pageId: childPageId,
+      userId: permission.userId,
+      groupId: permission.groupId,
+      role: permission.role,
+      inheritedFromSpaceRole: permission.inheritedFromSpaceRole,
+      cascadeToChildren: permission.cascadeToChildren,
+    }));
+
+    if (childPermissions.length > 0) {
+      await this.db
+        .insertInto('pageMembers')
+        .values(childPermissions)
+        .execute();
+    }
   }
 
   async nextPagePosition(spaceId: string, parentPageId?: string) {
@@ -183,11 +221,32 @@ export class PageService {
       .as('hasChildren');
   }
 
+
+  async withHasVisibleChildren(
+    parentPageId: string,
+    userId: string
+  ): Promise<boolean> {
+    const children = await this.pageRepo.findByParentId(parentPageId);
+
+    for (const child of children) {
+      const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+        userId,
+        child.id
+      );
+
+      if (effectiveRole !== PageRole.BLOCKED) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   async getSidebarPages(
     spaceId: string,
     pagination: PaginationOptions,
     pageId?: string,
-  ): Promise<any> {
+    userId?: string,
+  ): Promise<PaginationResult<any>> {
     let query = this.db
       .selectFrom('pages')
       .select([
@@ -210,12 +269,22 @@ export class PageService {
       query = query.where('parentPageId', 'is', null);
     }
 
-    const result = executeWithPagination(query, {
+    const result = await executeWithPagination(query, {
       page: pagination.page,
       perPage: 250,
     });
 
-    return result;
+    const items = await Promise.all(
+      result.items.map(async (page) => {
+        const hasVisibleChildren = await this.withHasVisibleChildren(page.id, userId);
+        return { ...page, hasVisibleChildren };
+      })
+    );
+
+    return {
+      ...result,
+      items,
+    };
   }
 
   async movePageToSpace(rootPage: Page, spaceId: string) {

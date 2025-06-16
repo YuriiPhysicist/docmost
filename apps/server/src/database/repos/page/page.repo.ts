@@ -91,6 +91,15 @@ export class PageRepo {
     return query.executeTakeFirst();
   }
 
+  async findByParentId(parentPageId: string): Promise<Page[]> {
+    return this.db
+      .selectFrom('pages')
+      .selectAll()
+      .where('parentPageId', '=', parentPageId)
+      .orderBy('position', 'asc')
+      .execute();
+  }
+
   async updatePage(
     updatablePage: UpdatablePage,
     pageId: string,

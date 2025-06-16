@@ -4,7 +4,6 @@ import {
   Text,
   ScrollArea,
   Stack,
-  Divider,
   Collapse,
   Button,
   Table,
@@ -59,6 +58,7 @@ export default function PagePermissionsModal({
       userId: member.userId,
       groupId: member.groupId,
       role: roleToSet,
+      cascadeToChildren: roleToSet === PageRole.BLOCKED
     });
   };
 
@@ -80,7 +80,7 @@ export default function PagePermissionsModal({
   };
 
   const isDisabled = (member: IPagePermissionMember): boolean => {
-    return member.spaceRole === PageRole.ADMIN;
+    return member.spaceRole === PageRole.ADMIN || member.parentPageRole === PageRole.BLOCKED;
   };
 
   if (!permissions) return null;

@@ -50,10 +50,7 @@ export default function Page() {
         </Helmet>
 
         <PageHeader
-          readOnly={spaceAbility.cannot(
-            SpaceCaslAction.Manage,
-            SpaceCaslSubject.Page,
-          )}
+          readOnly={page.effectiveRole === 'reader'}
         />
 
         <FullEditor
@@ -63,10 +60,7 @@ export default function Page() {
           content={page.content}
           slugId={page.slugId}
           spaceSlug={page?.space?.slug}
-          editable={spaceAbility.can(
-            SpaceCaslAction.Manage,
-            SpaceCaslSubject.Page,
-          )}
+          editable={page.effectiveRole !== 'reader'}
         />
         <HistoryModal pageId={page.id} />
       </div>

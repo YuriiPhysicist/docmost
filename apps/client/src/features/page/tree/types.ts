@@ -7,6 +7,7 @@ export type SpaceTreeNode = {
   spaceId: string;
   parentPageId: string;
   hasChildren: boolean;
+  hasVisibleChildren: boolean;
   children: SpaceTreeNode[];
   effectiveRole: string;
 };

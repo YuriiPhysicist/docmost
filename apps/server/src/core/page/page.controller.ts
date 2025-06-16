@@ -70,7 +70,7 @@ export class PageController {
       throw new ForbiddenException('Access to this page is blocked');
     }
 
-    return page;
+    return {...page, effectiveRole};
   }
 
   @HttpCode(HttpStatus.OK)
@@ -98,7 +98,17 @@ export class PageController {
       }
     }
 
-    return this.pageService.create(user.id, workspace.id, createPageDto);
+    const createdPage = await this.pageService.create(user.id, workspace.id, createPageDto);
+
+    const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+      user.id,
+      createdPage.id
+    );
+
+    return {
+      ...createdPage,
+      effectiveRole,
+    };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -231,7 +241,7 @@ export class PageController {
       pageId = page.id;
     }
 
-    const result = await this.pageService.getSidebarPages(dto.spaceId, pagination, pageId);
+    const result = await this.pageService.getSidebarPages(dto.spaceId, pagination, pageId, user.id);
 
     const enrichedItems = await Promise.all(
       result.items.map(async (page) => {
@@ -239,6 +249,7 @@ export class PageController {
           user.id,
           page.id
         );
+        console.log(page, effectiveRole)
 
         return {
           ...page,
@@ -348,7 +359,17 @@ export class PageController {
     if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.Page)) {
       throw new ForbiddenException();
     }
-    return this.pageService.getPageBreadCrumbs(page.id);
+    const breadcrumbPages = await this.pageService.getPageBreadCrumbs(page.id);
+
+    const pagesWithRoles = await Promise.all(
+      breadcrumbPages.map(async (p) => {
+        const effectiveRole = await this.pageMemberService.getUserEffectiveRole(user.id, p.id);
+        const hasVisibleChildren = await this.pageService.withHasVisibleChildren(p.id, user.id);
+        return { ...p, effectiveRole, hasVisibleChildren };
+      })
+    );
+
+    return pagesWithRoles;
   }
 
   @HttpCode(HttpStatus.OK)

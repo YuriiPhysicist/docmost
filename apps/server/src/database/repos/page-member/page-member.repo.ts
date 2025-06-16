@@ -286,4 +286,32 @@ export class PageMemberRepo {
       .select(['id'])
       .execute();
   }
+
+  async upsertPageMember(
+    insertablePageMember: InsertablePageMember,
+    trx?: KyselyTransaction,
+  ): Promise<PageMember> {
+    const db = dbOrTx(this.db, trx);
+
+    return db
+      .insertInto('pageMembers')
+      .values(insertablePageMember)
+      .onConflict((oc) => {
+        if (insertablePageMember.userId) {
+          return oc.columns(['pageId', 'userId']).doUpdateSet({
+            role: insertablePageMember.role,
+            cascadeToChildren: insertablePageMember.cascadeToChildren || false,
+            updatedAt: new Date(),
+          });
+        } else {
+          return oc.columns(['pageId', 'groupId']).doUpdateSet({
+            role: insertablePageMember.role,
+            cascadeToChildren: insertablePageMember.cascadeToChildren || false,
+            updatedAt: new Date(),
+          });
+        }
+      })
+      .returningAll()
+      .executeTakeFirst();
+  }
 }

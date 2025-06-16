@@ -53,33 +53,61 @@ export class PageMemberService {
       return PageRole.ADMIN;
     }
 
-    const pageOverride = await this.pageMemberRepo.findPagePermission(
-      pageId,
-      { userId }
-    );
+    const allUserRoles = await this.db
+      .selectFrom('spaceMembers')
+      .leftJoin('users', 'users.id', 'spaceMembers.userId')
+      .leftJoin('groupUsers', 'groupUsers.groupId', 'spaceMembers.groupId')
+      .leftJoin('pageMembers as userPageRole', (join) =>
+        join
+          .on('userPageRole.pageId', '=', pageId)
+          .on('userPageRole.userId', '=', userId)
+      )
+      .leftJoin('pageMembers as groupPageRole', (join) =>
+        join
+          .on('groupPageRole.pageId', '=', pageId)
+          .onRef('groupPageRole.groupId', '=', 'spaceMembers.groupId')
+      )
+      .select([
+        'spaceMembers.userId',
+        'spaceMembers.groupId',
+        'spaceMembers.role as spaceRole',
+        'userPageRole.role as userPageRole',
+        'groupPageRole.role as groupPageRole'
+      ])
+      .where('spaceMembers.spaceId', '=', page.spaceId)
+      .where((eb) =>
+        eb.or([
+          eb('spaceMembers.userId', '=', userId),
+          eb('groupUsers.userId', '=', userId)
+        ])
+      )
+      .execute();
 
-    if (pageOverride) {
-      return pageOverride.role as PageRole;
+    if (pageId === '019730fb-05c4-752b-9df9-e0b23ff186e3') {
+      console.log('allUserRoles', allUserRoles);
     }
 
-    const groupOverrides = await this.pageMemberRepo.getUserPagePermissions(
-      userId,
-      [pageId]
-    );
-
-    if (groupOverrides.length > 0) {
-      const highestGroupRole = this.findHighestPageRole(
-        groupOverrides.map(o => o.role as PageRole)
-      );
-      return highestGroupRole;
-    }
+    const allEffectiveRoles = allUserRoles
+      .map(i => {
+        if (i.userId === null) {
+          return i.groupPageRole || i.spaceRole;
+        } else {
+          return i.userPageRole || i.spaceRole;
+        }
+      })
+      .filter(Boolean) as PageRole[];
 
     const cascadeBlocked = await this.checkCascadeBlocked(userId, pageId);
     if (cascadeBlocked) {
       return PageRole.BLOCKED;
     }
 
-    return spaceRole as EffectivePageRole;
+    if (allEffectiveRoles.length > 0) {
+      const highestRole = this.findHighestPageRole(allEffectiveRoles);
+      return highestRole;
+    }
+
+    return PageRole.BLOCKED;
   }
 
   async setPagePermission(
@@ -173,11 +201,43 @@ export class PageMemberService {
       throw new NotFoundException('Page not found');
     }
 
-    return this.pageMemberRepo.getPageMembersWithEffectiveRoles(
+    const baseResult = await this.pageMemberRepo.getPageMembersWithEffectiveRoles(
       pageId,
       page.spaceId,
       pagination
     );
+
+    if (page.parentPageId) {
+      const parentPermissions = await this.pageMemberRepo.getPageOverrides(
+        page.parentPageId,
+        { page: 1, limit: 1000, query: undefined }
+      );
+
+      const parentRoleMap = new Map<string, string>();
+      parentPermissions.items.forEach((permission: any) => {
+        const key = permission.userId || permission.groupId;
+        if (key) {
+          parentRoleMap.set(key, permission.role);
+        }
+      });
+
+      baseResult.items = baseResult.items.map((item: any) => {
+        const memberKey = item.userId || item.groupId;
+        const parentRole = memberKey ? parentRoleMap.get(memberKey) || null : null;
+
+        return {
+          ...item,
+          parentPageRole: parentRole,
+        };
+      });
+    } else {
+      baseResult.items = baseResult.items.map((item: any) => ({
+        ...item,
+        parentPageRole: undefined,
+      }));
+    }
+
+    return baseResult;
   }
 
   private isEquivalentRole(pageRole: PageRole, spaceRole: SpaceRole): boolean {
@@ -228,9 +288,12 @@ export class PageMemberService {
       [PageRole.BLOCKED]: 1,
     };
 
-    return roles.reduce((highest, current) =>
-      hierarchy[current] > hierarchy[highest] ? current : highest
-    );
+    return roles.reduce((highest, current) => {
+      if (hierarchy[current] > hierarchy[highest]) {
+        return current;
+      }
+      return highest;
+    }, roles[0]);
   }
 
   private async checkCascadeBlocked(
@@ -277,13 +340,10 @@ export class PageMemberService {
     groupId?: string,
     trx?: KyselyTransaction,
   ): Promise<void> {
-    const descendants = await this.pageMemberRepo.getDescendantPages(
-      parentPageId,
-      trx
-    );
+    const descendants = await this.pageMemberRepo.getDescendantPages(parentPageId, trx);
 
     for (const descendant of descendants) {
-      await this.pageMemberRepo.insertPageMember(
+      await this.pageMemberRepo.upsertPageMember(
         {
           pageId: descendant.id,
           userId,

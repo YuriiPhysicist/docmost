@@ -63,7 +63,6 @@ import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sideb
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import CopyPageModal from "../../components/copy-page-modal.tsx";
 import PagePermissionsModal from "@/features/page/components/page-permissions-modal.tsx";
-import {ca} from "date-fns/locale";
 
 interface SpaceTreeProps {
   spaceId: string;
@@ -272,7 +271,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   };
 
   async function handleLoadChildren(node: NodeApi<SpaceTreeNode>) {
-    if (!node.data.hasChildren) return;
+    if (!node.data.hasVisibleChildren) return;
     // in conflict with use-query-subscription.ts => case "addTreeNode","moveTreeNode" etc with websocket
     // if (node.data.children && node.data.children.length > 0) {
     //   return;
@@ -338,7 +337,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   if (
     node.willReceiveDrop &&
     node.isClosed &&
-    (node.children.length > 0 || node.data.hasChildren)
+    (node.children.length > 0 || node.data.hasVisibleChildren)
   ) {
     handleLoadChildren(node);
     setTimeout(() => {
@@ -410,7 +409,7 @@ interface CreateNodeProps {
 
 function CreateNode({ node, treeApi, onExpandTree }: CreateNodeProps) {
   function handleCreate() {
-    if (node.data.hasChildren && node.children.length === 0) {
+    if (node.data.hasVisibleChildren && node.children.length === 0) {
       node.toggle();
       onExpandTree();
 
@@ -621,7 +620,7 @@ function PageArrow({ node, onExpandTree }: PageArrowProps) {
       }}
     >
       {node.isInternal ? (
-        node.children && (node.children.length > 0 || node.data.hasChildren) ? (
+        node.children && (node.children.length > 0 || node.data.hasVisibleChildren) ? (
           node.isOpen ? (
             <IconChevronDown stroke={2} size={18} />
           ) : (

@@ -1,6 +1,6 @@
 import { ISpace } from "@/features/space/types/space.types.ts";
 
-export type AccessLevel = 'admin' | 'writer' | 'reader' | 'block';
+export type AccessLevel = 'admin' | 'writer' | 'reader' | 'blocked';
 
 export interface IPage {
   id: string;
@@ -20,6 +20,7 @@ export interface IPage {
   deletedAt: Date;
   position: string;
   hasChildren: boolean;
+  hasVisibleChildren: boolean;
   creator: ICreator;
   lastUpdatedBy: ILastUpdatedBy;
   effectiveRole: AccessLevel;

@@ -22,6 +22,7 @@ export function buildTree(pages: IPage[]): SpaceTreeNode[] {
       icon: page.icon,
       position: page.position,
       hasChildren: page.hasChildren,
+      hasVisibleChildren: page.hasVisibleChildren,
       spaceId: page.spaceId,
       parentPageId: page.parentPageId,
       effectiveRole: page.effectiveRole,
