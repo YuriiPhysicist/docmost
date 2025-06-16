@@ -389,5 +389,17 @@
   "Failed to share page": "Не вдалося поділитися сторінкою",
   "Copy page": "Копіювати сторінки",
   "Copy page to a different space.": "Copy page to a different space.",
-  "Page copied successfully": "Page copied successfully"
+  "Page copied successfully": "Page copied successfully",
+  "Page Role": "Роль на сторінці",
+  "{{count}} members": "Учасників - {{count}}",
+  "Group members:": "Учасники групи:",
+  "admin": "Адміністратор",
+  "writer": "Редактор",
+  "reader": "Читач",
+  "blocked": "Заблоковано",
+  "Has full access to page settings and content.": "Має повний доступ до налаштувань і вмісту сторінки.",
+  "Can edit page content.": "Може редагувати вміст сторінки.",
+  "Can view page but not edit.": "Може переглядати сторінку, але не редагувати.",
+  "Blocked": "Заблоковано",
+  "Cannot access this page.": "Не має доступу до цієї сторінки."
 }
