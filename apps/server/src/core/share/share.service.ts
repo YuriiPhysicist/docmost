@@ -23,6 +23,7 @@ import { updateAttachmentAttr } from './share.util';
 import { Page } from '@docmost/db/types/entity.types';
 import { validate as isValidUUID } from 'uuid';
 import { sql } from 'kysely';
+import {PageAccessFilterService} from "../page/services/page-access-filter.service";
 
 @Injectable()
 export class ShareService {
@@ -33,9 +34,10 @@ export class ShareService {
     private readonly pageRepo: PageRepo,
     @InjectKysely() private readonly db: KyselyDB,
     private readonly tokenService: TokenService,
+    private readonly pageAccessFilterService: PageAccessFilterService
   ) {}
 
-  async getShareTree(shareId: string, workspaceId: string) {
+  async getShareTree(shareId: string, workspaceId: string, userId: string) {
     const share = await this.shareRepo.findById(shareId);
     if (!share || share.workspaceId !== workspaceId) {
       throw new NotFoundException('Share not found');
@@ -45,6 +47,11 @@ export class ShareService {
       const pageList = await this.pageRepo.getPageAndDescendants(share.pageId, {
         includeContent: false,
       });
+
+      if (userId) {
+        const filteredPageList = await this.pageAccessFilterService.filterPagesByAccess(pageList, userId);
+        return { share, pageTree: filteredPageList };
+      }
 
       return { share, pageTree: pageList };
     } else {

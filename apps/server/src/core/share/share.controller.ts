@@ -172,9 +172,10 @@ export class ShareController {
   async getSharePageTree(
     @Body() dto: ShareIdDto,
     @AuthWorkspace() workspace: Workspace,
+    @AuthUser() user: User
   ) {
     return {
-      ...(await this.shareService.getShareTree(dto.shareId, workspace.id)),
+      ...(await this.shareService.getShareTree(dto.shareId, workspace.id, user.id)),
       hasLicenseKey:
         Boolean(workspace.licenseKey) ||
         (this.environmentService.isCloud() && workspace.plan === 'business'),

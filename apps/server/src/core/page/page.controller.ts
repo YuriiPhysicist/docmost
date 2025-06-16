@@ -285,7 +285,6 @@ export class PageController {
           user.id,
           page.id
         );
-        console.log(page, effectiveRole)
 
         return {
           ...page,

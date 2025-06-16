@@ -83,10 +83,6 @@ export class PageMemberService {
       )
       .execute();
 
-    if (pageId === '019730fb-05c4-752b-9df9-e0b23ff186e3') {
-      console.log('allUserRoles', allUserRoles);
-    }
-
     const allEffectiveRoles = allUserRoles
       .map(i => {
         if (i.userId === null) {
