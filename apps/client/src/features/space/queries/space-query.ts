@@ -224,6 +224,9 @@ export function useChangeSpaceMemberRoleMutation() {
   return useMutation<void, Error, IChangeSpaceMemberRole>({
     mutationFn: (data) => changeMemberRole(data),
     onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pagePermissions"],
+      });
       notifications.show({ message: t("Member role updated successfully") });
       // due to pagination levels, change in cache instead
       queryClient.refetchQueries({
