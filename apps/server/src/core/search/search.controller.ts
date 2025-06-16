@@ -24,8 +24,8 @@ import {
 } from '../casl/interfaces/space-ability.type';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
-import { PageMemberService } from '../page/services/page-member.service'; // Додаємо імпорт
-import { PageRole } from '../../common/helpers/types/permission'; // Додаємо імпорт
+import { PageMemberService } from '../page/services/page-member.service';
+import { PageRole } from '../../common/helpers/types/permission';
 
 @UseGuards(JwtAuthGuard)
 @Controller('search')
@@ -33,7 +33,7 @@ export class SearchController {
   constructor(
     private readonly searchService: SearchService,
     private readonly spaceAbility: SpaceAbilityFactory,
-    private readonly pageMemberService: PageMemberService, // Додаємо інжекцію
+    private readonly pageMemberService: PageMemberService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -78,7 +78,6 @@ export class SearchController {
   ) {
     const suggestions = await this.searchService.searchSuggestions(dto, user.id, workspace.id);
 
-    // Фільтруємо сторінки в suggestions за effectiveRole
     if (suggestions.pages && suggestions.pages.length > 0) {
       const filteredPages = await this.filterPagesSuggestionsByEffectiveRole(
         suggestions.pages,
