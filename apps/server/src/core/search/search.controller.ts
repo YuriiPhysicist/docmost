@@ -24,6 +24,8 @@ import {
 } from '../casl/interfaces/space-ability.type';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { PageMemberService } from '../page/services/page-member.service'; // Додаємо імпорт
+import { PageRole } from '../../common/helpers/types/permission'; // Додаємо імпорт
 
 @UseGuards(JwtAuthGuard)
 @Controller('search')
@@ -31,6 +33,7 @@ export class SearchController {
   constructor(
     private readonly searchService: SearchService,
     private readonly spaceAbility: SpaceAbilityFactory,
+    private readonly pageMemberService: PageMemberService, // Додаємо інжекцію
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -53,10 +56,17 @@ export class SearchController {
       }
     }
 
-    return this.searchService.searchPage(searchDto.query, searchDto, {
+    const searchResults = await this.searchService.searchPage(searchDto.query, searchDto, {
       userId: user.id,
       workspaceId: workspace.id,
     });
+
+    const filteredResults = await this.filterSearchResultsByEffectiveRole(
+      searchResults,
+      user.id
+    );
+
+    return filteredResults;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -66,7 +76,18 @@ export class SearchController {
     @AuthUser() user: User,
     @AuthWorkspace() workspace: Workspace,
   ) {
-    return this.searchService.searchSuggestions(dto, user.id, workspace.id);
+    const suggestions = await this.searchService.searchSuggestions(dto, user.id, workspace.id);
+
+    // Фільтруємо сторінки в suggestions за effectiveRole
+    if (suggestions.pages && suggestions.pages.length > 0) {
+      const filteredPages = await this.filterPagesSuggestionsByEffectiveRole(
+        suggestions.pages,
+        user.id
+      );
+      suggestions.pages = filteredPages;
+    }
+
+    return suggestions;
   }
 
   @Public()
@@ -84,5 +105,71 @@ export class SearchController {
     return this.searchService.searchPage(searchDto.query, searchDto, {
       workspaceId: workspace.id,
     });
+  }
+
+  private async filterSearchResultsByEffectiveRole(
+    searchResults: any[],
+    userId: string
+  ): Promise<any[]> {
+    if (!searchResults || searchResults.length === 0) {
+      return searchResults;
+    }
+
+    const filteredResults = await Promise.all(
+      searchResults.map(async (result) => {
+        try {
+          const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+            userId,
+            result.id
+          );
+
+          if (effectiveRole === PageRole.BLOCKED) {
+            return null;
+          }
+
+          return {
+            ...result,
+            effectiveRole,
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+    );
+
+    return filteredResults.filter(result => result !== null);
+  }
+
+  private async filterPagesSuggestionsByEffectiveRole(
+    pages: any[],
+    userId: string
+  ): Promise<any[]> {
+    if (!pages || pages.length === 0) {
+      return pages;
+    }
+
+    const filteredPages = await Promise.all(
+      pages.map(async (page) => {
+        try {
+          const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+            userId,
+            page.id
+          );
+
+          if (effectiveRole === PageRole.BLOCKED) {
+            return null;
+          }
+
+          return {
+            ...page,
+            effectiveRole,
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+    );
+
+    return filteredPages.filter(page => page !== null);
   }
 }

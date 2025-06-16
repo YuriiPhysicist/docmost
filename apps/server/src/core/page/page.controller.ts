@@ -173,13 +173,49 @@ export class PageController {
         throw new ForbiddenException();
       }
 
-      return this.pageService.getRecentSpacePages(
+      const result = await this.pageService.getRecentSpacePages(
         recentPageDto.spaceId,
         pagination,
       );
+
+      const filteredItems = await this.filterPagesByEffectiveRole(result.items, user.id);
+
+      return {
+        ...result,
+        items: filteredItems,
+      };
     }
 
-    return this.pageService.getRecentPages(user.id, pagination);
+    const result = await this.pageService.getRecentPages(user.id, pagination);
+
+    const filteredItems = await this.filterPagesByEffectiveRole(result.items, user.id);
+
+    return {
+      ...result,
+      items: filteredItems,
+    };
+  }
+
+  private async filterPagesByEffectiveRole(pages: any[], userId: string): Promise<any[]> {
+    const filteredPages = await Promise.all(
+      pages.map(async (page) => {
+        const effectiveRole = await this.pageMemberService.getUserEffectiveRole(
+          userId,
+          page.id
+        );
+
+        if (effectiveRole === PageRole.BLOCKED) {
+          return null;
+        }
+
+        return {
+          ...page,
+          effectiveRole,
+        };
+      })
+    );
+
+    return filteredPages.filter(page => page !== null);
   }
 
   // TODO: scope to workspaces
