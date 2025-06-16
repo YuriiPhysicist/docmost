@@ -61,13 +61,6 @@ export default function PageExportModal({
             <ExportFormatSelection format={format} onChange={handleChange} />
           </Group>
 
-          <Group justify="space-between" wrap="nowrap" pt="md">
-            <div>
-              <Text size="md">{t("Include subpages")}</Text>
-            </div>
-            <Switch defaultChecked />
-          </Group>
-
           <Group justify="center" mt="md">
             <Button onClick={onClose} variant="default">
               {t("Cancel")}

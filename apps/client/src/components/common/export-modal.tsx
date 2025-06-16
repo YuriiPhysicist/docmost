@@ -81,24 +81,6 @@ export default function ExportModal({
             <ExportFormatSelection format={format} onChange={handleChange} />
           </Group>
 
-          {type === "page" && (
-            <>
-              <Divider my="sm" />
-
-              <Group justify="space-between" wrap="nowrap">
-                <div>
-                  <Text size="md">{t("Include subpages")}</Text>
-                </div>
-                <Switch
-                  onChange={(event) =>
-                    setIncludeChildren(event.currentTarget.checked)
-                  }
-                  checked={includeChildren}
-                />
-              </Group>
-            </>
-          )}
-
           {type === "space" && (
             <>
               <Divider my="sm" />
