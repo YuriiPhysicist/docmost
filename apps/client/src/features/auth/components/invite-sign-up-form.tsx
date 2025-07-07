@@ -76,8 +76,8 @@ export function InviteSignUpForm() {
             <TextInput
               id="name"
               type="text"
-              label={t("Name")}
-              placeholder={t("enter your full name")}
+              label={"Ім'я у форматі 'Тарас Шевченко'"}
+              placeholder={"Тарас Шевченко"}
               variant="filled"
               {...form.getInputProps("name")}
             />

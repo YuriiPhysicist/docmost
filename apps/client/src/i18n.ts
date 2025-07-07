@@ -12,7 +12,7 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    fallbackLng: "en-US",
+    fallbackLng: "uk-UA",
     debug: false,
     load: 'currentOnly',
 
