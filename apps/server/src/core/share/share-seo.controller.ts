@@ -77,7 +77,7 @@ export class ShareSeoController {
       const metaTags = [
         `<meta property="og:title" content="${metaTitle}" />`,
         `<meta property="twitter:title" content="${metaTitle}" />`,
-        !share.searchIndexing ? `<meta name="robots" content="noindex" />` : '',
+        `<meta name="robots" content="noindex" />`
       ]
         .filter(Boolean)
         .join('\n    ');

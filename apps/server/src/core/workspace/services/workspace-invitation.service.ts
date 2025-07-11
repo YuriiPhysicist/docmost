@@ -100,6 +100,14 @@ export class WorkspaceInvitationService {
   ): Promise<void> {
     const { emails, role, groupIds } = inviteUserDto;
 
+    // Validate that all emails end with ua.energy
+    const invalidEmails = emails.filter(email => !email.endsWith('ua.energy'));
+    if (invalidEmails.length > 0) {
+      throw new BadRequestException(
+        'Всі електронні адреси повинні закінчуватися на ua.energy',
+      );
+    }
+
     let invites: WorkspaceInvitation[] = [];
 
     try {

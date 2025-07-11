@@ -27,7 +27,7 @@ export function FullEditor({
   editable,
 }: FullEditorProps) {
   const [user] = useAtom(userAtom);
-  const fullPageWidth = user.settings?.preferences?.fullPageWidth;
+  const fullPageWidth = user.settings?.preferences?.fullPageWidth ?? true;
 
   return (
     <Container

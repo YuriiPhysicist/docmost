@@ -47,7 +47,7 @@ export function WorkspaceInviteForm({ onClose }: Props) {
         <TagsInput
           mt="sm"
           description={t(
-            "Enter valid email addresses separated by comma or space max_50",
+            "Enter valid email addresses with ua.energy",
           )}
           label={t("Invite by email")}
           placeholder={t("enter valid emails addresses")}

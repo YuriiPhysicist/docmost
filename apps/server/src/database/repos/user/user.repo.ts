@@ -107,9 +107,10 @@ export class UserRepo {
         insertableUser.name || insertableUser.email.split('@')[0].toLowerCase(),
       email: insertableUser.email.toLowerCase(),
       password: await hashPassword(insertableUser.password),
-      locale: 'en-US',
+      locale: 'uk-UA',
       role: insertableUser?.role,
       lastLoginAt: new Date(),
+      settings: {preferences: {fullPageWidth: true}},
     };
 
     const db = dbOrTx(this.db, trx);

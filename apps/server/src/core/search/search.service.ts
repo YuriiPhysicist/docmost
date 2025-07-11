@@ -84,19 +84,7 @@ export class SearchService {
         return [];
       }
 
-      const pageIdsToSearch = [];
-      if (share.includeSubPages) {
-        const pageList = await this.pageRepo.getPageAndDescendants(
-          share.pageId,
-          {
-            includeContent: false,
-          },
-        );
-
-        pageIdsToSearch.push(...pageList.map((page) => page.id));
-      } else {
-        pageIdsToSearch.push(share.pageId);
-      }
+      const pageIdsToSearch = [share.pageId];
 
       if (pageIdsToSearch.length > 0) {
         queryResults = queryResults

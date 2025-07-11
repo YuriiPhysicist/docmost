@@ -25,7 +25,7 @@ function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
   const [user, setUser] = useAtom(userAtom);
   const [language, setLanguage] = useState(
-    user?.locale === "en" ? "en-US" : user.locale,
+    user?.locale === "en" ? "uk-UA" : user.locale,
   );
 
   const handleChange = async (value: string) => {
@@ -43,18 +43,9 @@ function LanguageSwitcher() {
       data={[
         { value: "uk-UA", label: "Українська (Ukrainian)" },
         { value: "en-US", label: "English (US)" },
-        { value: "de-DE", label: "Deutsch (German)" },
-        { value: "nl-NL", label: "Dutch (Netherlands)" },
-        { value: "fr-FR", label: "Français (French)" },
-        { value: "es-ES", label: "Español (Spanish)" },
-        { value: "pt-BR", label: "Português (Brasil)" },
-        { value: "it-IT", label: "Italiano (Italian)" },
-        { value: "ja-JP", label: "日本語 (Japanese)" },
-        { value: "ko-KR", label: "한국어 (Korean)" },
-        { value: "ru-RU", label: "Русский (Russian)" },
-        { value: "zh-CN", label: "中文 (简体)" },
       ]}
-      value={language || "en-US"}
+      value={language || "uk-UA"}
+      disabled
       onChange={handleChange}
       allowDeselect={false}
       checkIconPosition="right"

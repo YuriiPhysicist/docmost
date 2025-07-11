@@ -49,7 +49,7 @@ export function UserProvider({ children }: React.PropsWithChildren) {
     if (data && data.user && data.workspace) {
       setCurrentUser(data);
       i18n.changeLanguage(
-        data.user.locale === "en" ? "en-US" : data.user.locale,
+        data.user.locale === "en" ? "uk-UA" : data.user.locale,
       );
     }
   }, [data, isLoading]);

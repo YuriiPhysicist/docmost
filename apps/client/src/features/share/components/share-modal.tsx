@@ -60,8 +60,8 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
     if (value) {
       createShareMutation.mutateAsync({
         pageId: pageId,
-        includeSubPages: true,
-        searchIndexing: true,
+        includeSubPages: false,
+        searchIndexing: false,
       });
       setIsPagePublic(value);
     } else {
@@ -70,26 +70,6 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
         setIsPagePublic(value);
       }
     }
-  };
-
-  const handleSubPagesChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const value = event.currentTarget.checked;
-    updateShareMutation.mutateAsync({
-      shareId: share.id,
-      includeSubPages: value,
-    });
-  };
-
-  const handleIndexSearchChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const value = event.currentTarget.checked;
-    updateShareMutation.mutateAsync({
-      shareId: share.id,
-      searchIndexing: value,
-    });
   };
 
   const shareLink = useMemo(() => (
@@ -188,35 +168,6 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
             {pageIsShared && (
               <>
                 {shareLink}
-                <Group justify="space-between" wrap="nowrap" gap="xl">
-                  <div>
-                    <Text size="sm">{t("Include sub-pages")}</Text>
-                    <Text size="xs" c="dimmed">
-                      {t("Make sub-pages public too")}
-                    </Text>
-                  </div>
-
-                  <Switch
-                    onChange={handleSubPagesChange}
-                    checked={share.includeSubPages}
-                    size="xs"
-                    disabled={readOnly}
-                  />
-                </Group>
-                <Group justify="space-between" wrap="nowrap" gap="xl" mt="sm">
-                  <div>
-                    <Text size="sm">{t("Search engine indexing")}</Text>
-                    <Text size="xs" c="dimmed">
-                      {t("Allow search engines to index page")}
-                    </Text>
-                  </div>
-                  <Switch
-                    onChange={handleIndexSearchChange}
-                    checked={share.searchIndexing}
-                    size="xs"
-                    disabled={readOnly}
-                  />
-                </Group>
               </>
             )}
           </>

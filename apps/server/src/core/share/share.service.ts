@@ -43,20 +43,7 @@ export class ShareService {
       throw new NotFoundException('Share not found');
     }
 
-    if (share.includeSubPages) {
-      const pageList = await this.pageRepo.getPageAndDescendants(share.pageId, {
-        includeContent: false,
-      });
-
-      if (userId) {
-        const filteredPageList = await this.pageAccessFilterService.filterPagesByAccess(pageList, userId);
-        return { share, pageTree: filteredPageList };
-      }
-
-      return { share, pageTree: pageList };
-    } else {
-      return { share, pageTree: [] };
-    }
+    return { share, pageTree: [] };
   }
 
   async createShare(opts: {
@@ -76,8 +63,8 @@ export class ShareService {
       return await this.shareRepo.insertShare({
         key: nanoIdGen().toLowerCase(),
         pageId: page.id,
-        includeSubPages: createShareDto.includeSubPages || true,
-        searchIndexing: createShareDto.searchIndexing || true,
+        includeSubPages: false,
+        searchIndexing: false,
         creatorId: authUserId,
         spaceId: page.spaceId,
         workspaceId,
@@ -92,8 +79,8 @@ export class ShareService {
     try {
       return this.shareRepo.updateShare(
         {
-          includeSubPages: updateShareDto.includeSubPages,
-          searchIndexing: updateShareDto.searchIndexing,
+          includeSubPages: false,
+          searchIndexing: false,
         },
         shareId,
       );
@@ -181,7 +168,7 @@ export class ShareService {
       return undefined;
     }
 
-    if (share.level === 1 && !share.includeSubPages) {
+    if (share.level === 1) {
       // we can only show a page if its shared ancestor permits it
       return undefined;
     }

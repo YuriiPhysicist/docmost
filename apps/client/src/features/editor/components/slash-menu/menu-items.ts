@@ -343,7 +343,7 @@ const CommandGroups: SlashMenuGroupedItemsType = {
       searchTerms: ["date", "today"],
       icon: IconCalendar,
       command: ({ editor, range }: CommandProps) => {
-        const currentDate = new Date().toLocaleDateString("en-US", {
+        const currentDate = new Date().toLocaleDateString("uk-UA", {
           year: "numeric",
           month: "long",
           day: "numeric",
