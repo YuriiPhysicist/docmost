@@ -62,7 +62,7 @@ export async function getPendingInvitations(
 }
 
 export async function createInvitation(data: ICreateInvite) {
-  const req = await api.post("/workspace/invites/create", data);
+  const req = await api.post<IInvitation[]>("/workspace/invites/create", data);
   return req.data;
 }
 

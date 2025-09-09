@@ -113,10 +113,10 @@ export function useCreateInvitationMutation() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, ICreateInvite>({
+  return useMutation<IInvitation[], Error, ICreateInvite>({
     mutationFn: (data) => createInvitation(data),
     onSuccess: (data, variables) => {
-      notifications.show({ message: t("Invitation sent") });
+      notifications.show({ message: t("Invitation generated") });
       queryClient.refetchQueries({
         queryKey: ["invitations"],
       });

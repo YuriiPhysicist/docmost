@@ -87,13 +87,6 @@ export default function InviteActionMenu({ invitationId }: Props) {
             </Menu.Item>
           )}
 
-          <Menu.Item
-            onClick={onResend}
-            leftSection={<IconSend size={16} />}
-            disabled={!isAdmin}
-          >
-            {t("Resend invitation")}
-          </Menu.Item>
           <Menu.Divider />
           <Menu.Item
             c="red"

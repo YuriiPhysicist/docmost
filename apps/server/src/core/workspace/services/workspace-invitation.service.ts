@@ -97,7 +97,7 @@ export class WorkspaceInvitationService {
     inviteUserDto: InviteUserDto,
     workspace: Workspace,
     authUser: User,
-  ): Promise<void> {
+  ): Promise<WorkspaceInvitation[]> {
     const { emails, role, groupIds } = inviteUserDto;
 
     // Validate that all emails end with ua.energy
