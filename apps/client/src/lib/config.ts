@@ -66,7 +66,7 @@ export function getFileUrl(src: string) {
 }
 
 export function getFileUploadSizeLimit() {
-  const limit = getConfigValue("FILE_UPLOAD_SIZE_LIMIT", "50mb");
+  const limit = getConfigValue("5mb");
   return bytes(limit);
 }
 
@@ -78,9 +78,6 @@ export function getBillingTrialDays() {
   return getConfigValue("BILLING_TRIAL_DAYS");
 }
 
-function getConfigValue(key: string, defaultValue: string = undefined): string {
-  const rawValue = import.meta.env.DEV
-    ? process?.env?.[key]
-    : window?.CONFIG?.[key];
-  return rawValue ?? defaultValue;
+function getConfigValue(defaultValue: string = undefined): string {
+  return defaultValue;
 }
