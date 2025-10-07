@@ -175,6 +175,8 @@ export class WorkspaceInvitationService {
         );
       });
     }
+
+    return invites;
   }
 
   async acceptInvitation(dto: AcceptInviteDto, workspaceId: string) {

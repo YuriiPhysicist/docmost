@@ -73,6 +73,7 @@ import i18n from "@/i18n.ts";
 import { MarkdownClipboard } from "@/features/editor/extensions/markdown-clipboard.ts";
 import EmojiCommand from "./emoji-command";
 import { CharacterCount } from "@tiptap/extension-character-count";
+import {Heading} from "@tiptap/extension-heading";
 
 const lowlight = createLowlight(common);
 lowlight.register("mermaid", plaintext);
@@ -88,6 +89,7 @@ lowlight.register("scala", scala);
 
 export const mainExtensions = [
   StarterKit.configure({
+    heading: false,
     history: false,
     dropcursor: {
       width: 3,
@@ -99,6 +101,9 @@ export const mainExtensions = [
         spellcheck: false,
       },
     },
+  }),
+  Heading.configure({
+    levels: [1, 2, 3, 4, 5, 6],
   }),
   Placeholder.configure({
     placeholder: ({ node }) => {
