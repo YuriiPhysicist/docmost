@@ -66,8 +66,7 @@ export function getFileUrl(src: string) {
 }
 
 export function getFileUploadSizeLimit() {
-  const limit = getConfigValue("FILE_UPLOAD_SIZE_LIMIT", "5mb");
-  return bytes(limit);
+  return bytes("5mb");
 }
 
 export function getDrawioUrl() {
