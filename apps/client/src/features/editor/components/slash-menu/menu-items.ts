@@ -114,7 +114,7 @@ const CommandGroups: SlashMenuGroupedItemsType = {
     },
     {
       title: "Heading 4",
-      description: "Small section heading (level 6).",
+      description: "Small section heading (level 4).",
       searchTerms: ["subtitle", "small"],
       icon: IconH4,
       command: ({ editor, range }: CommandProps) => {
