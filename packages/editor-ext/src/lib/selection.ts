@@ -42,20 +42,15 @@ export const Selection = Extension.create({
           handleDOMEvents: {
             contextmenu: (view, event) => {
               event.preventDefault();
-
-
               const pos = view.posAtCoords({
                 left: event.clientX,
                 top: event.clientY,
               });
               if (!pos) return false;
-
               const { doc } = view.state;
               const resolvedPos = doc.resolve(pos.pos);
-
               const { from, to } = view.state.selection;
               if (from !== to) return false;
-
               const word = resolvedPos.parent.childAfter(resolvedPos.parentOffset);
               if (word.node && word.node.isText) {
                 const start = resolvedPos.start();
@@ -63,10 +58,8 @@ export const Selection = Extension.create({
                 const text = resolvedPos.parent.textBetween(0, resolvedPos.parent.content.size, " ");
                 const before = text.slice(0, offset).split(" ").pop()?.length ?? 0;
                 const after = text.slice(offset).split(" ")[0]?.length ?? 0;
-
                 const fromPos = Math.max(pos.pos - before, start);
                 const toPos = Math.min(pos.pos + after, doc.content.size);
-
                 const tr = view.state.tr.setSelection(
                   TextSelection.create(doc, fromPos, toPos)
                 );
@@ -74,13 +67,11 @@ export const Selection = Extension.create({
                 view.focus();
                 return true;
               }
-
               const tr = view.state.tr.setSelection(
                 TextSelection.near(resolvedPos)
               );
               view.dispatch(tr);
               view.focus();
-
               return true;
             },
           },

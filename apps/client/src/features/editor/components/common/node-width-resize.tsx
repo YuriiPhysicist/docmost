@@ -2,12 +2,13 @@ import { memo, useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Slider } from '@mantine/core';
 
 export type ImageWidthProps = {
+  isImg: boolean;
   onChange: (value: number) => void;
   value: number;
   width?: string;
 };
 
-export const NodeWidthResize = memo(({ onChange, value, width }: ImageWidthProps) => {
+export const NodeWidthResize = memo(({ isImg, onChange, value, width }: ImageWidthProps) => {
   const [currentValue, setCurrentValue] = useState(value);
 
   useLayoutEffect(() => {
@@ -24,7 +25,8 @@ export const NodeWidthResize = memo(({ onChange, value, width }: ImageWidthProps
   return (
     <Slider
       p={'sm'}
-      min={10}
+      min={isImg ? 1 : 10}
+      max={isImg ? 500 : 100}
       value={currentValue}
       onChange={setCurrentValue}
       onChangeEnd={handleChangeEnd}

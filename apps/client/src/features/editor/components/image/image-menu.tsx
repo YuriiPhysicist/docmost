@@ -142,6 +142,7 @@ export function ImageMenu({ editor }: EditorMenuProps) {
 
       {editor.getAttributes("image")?.width && (
         <NodeWidthResize
+          isImg
           onChange={onWidthChange}
           value={parseInt(editor.getAttributes("image").width)}
         />

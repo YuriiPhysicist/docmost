@@ -129,7 +129,7 @@ export const TiptapImage = Image.extend<ImageOptions>({
         (width) =>
         ({ commands }) =>
           commands.updateAttributes("image", {
-            width: `${Math.max(0, Math.min(100, width))}%`,
+            width: `${Math.max(0, width)}%`,
           }),
     };
   },
