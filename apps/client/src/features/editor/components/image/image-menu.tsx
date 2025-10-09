@@ -97,7 +97,7 @@ export function ImageMenu({ editor }: EditorMenuProps) {
       }}
       shouldShow={shouldShow}
     >
-      <ActionIcon.Group className="actionIconGroup">
+      <ActionIcon.Group className="actionIconGroup" style={{ display: "flex", flexDirection: "row", justifyContent: "center", width: "100%" }}>
         <Tooltip position="top" label={t("Align left")}>
           <ActionIcon
             onClick={alignImageLeft}
@@ -142,6 +142,7 @@ export function ImageMenu({ editor }: EditorMenuProps) {
 
       {editor.getAttributes("image")?.width && (
         <NodeWidthResize
+          width={'300px'}
           isImg
           onChange={onWidthChange}
           value={parseInt(editor.getAttributes("image").width)}

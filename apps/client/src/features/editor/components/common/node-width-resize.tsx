@@ -25,7 +25,8 @@ export const NodeWidthResize = memo(({ isImg, onChange, value, width }: ImageWid
   return (
     <Slider
       p={'sm'}
-      min={isImg ? 1 : 10}
+      step={isImg ? 10 : 1}
+      min={10}
       max={isImg ? 500 : 100}
       value={currentValue}
       onChange={setCurrentValue}
