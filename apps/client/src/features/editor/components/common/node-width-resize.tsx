@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Slider } from '@mantine/core';
 
 export type ImageWidthProps = {
-  isImg: boolean;
+  isImg?: boolean;
   onChange: (value: number) => void;
   value: number;
   width?: string;
